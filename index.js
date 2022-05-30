@@ -1,79 +1,74 @@
 //api key 3bf6204b
-const fetchData = async (searchTerm)=>{
-    const response = await axios.get("http://www.omdbapi.com/", {
-        params:{
-            apikey: "3bf6204b",
-            s: searchTerm
-        }
-    });
-    if(!response.data.Search){
-        return [];
-    }
-    return response.data.Search;
-}
 
-const root = document.querySelector('.autocomplete');
-root.innerHTML = `
-    <input class="input" placeholder = "First Movie"/>
-    <div class="dropdown">
-        <div class="dropdown-menu">
-            <div class="dropdown-content results"></div>
-        </div>
-    </div>
-`
-
-
-const input = document.querySelector(".input");
-const dropdown = document.querySelector(".dropdown");
-const resultsWrapper = document.querySelector(".results")
-
-const onInput = debounceHelper(async event => {
-    const movies = await fetchData(event.target.value.trim());
-    
-    if(!movies.length){
-        dropdown.classList.remove("is-active")
-        return;
-    }
-
-    resultsWrapper.innerHTML = "";
-
-    dropdown.classList.add('is-active')
-
-    for (let movie of movies){
-        const option = document.createElement('a');
-        option.classList.add('dropdown-item')
+const autoCompleteConfig = {
+    renderOption(movie){
         let imgSrc = movie.Poster == "N/A" ? "" : movie.Poster;
-        option.innerHTML = `
-            <img src="${imgSrc}"/>
-            <b>${movie.Title}</b>
+        return  `
+        <img src="${imgSrc}"/>
+        ${movie.Title} (${movie.Year})
         `
-        option.addEventListener('click', ()=>{
-            dropdown.classList.remove('is-active');
-            input.value = movie.Title;
-            onMovieSelect(movie)
-        })
-        resultsWrapper.appendChild(option);
-    }
-}, 500)
-
-input.addEventListener('input', onInput)
-
-document.addEventListener('click', (event)=>{
-    if(!root.contains(event.target)){
-        dropdown.classList.remove('is-active')
-    }
-})
-
-const onMovieSelect = async (movie)=>{
-    const {imdbID: movieId} = movie
-    const response = await axios.get("http://www.omdbapi.com/", {
-        params:{
-            apikey: "3bf6204b",
-            i: movieId
+    },
+    inputValue(movie){
+        return movie.Title;
+    },
+    async fetchData(searchTerm){
+        const response = await axios.get("http://www.omdbapi.com/", {
+            params:{
+                apikey: "3bf6204b",
+                s: searchTerm
+            }
+        });
+        if(!response.data.Search){
+            return [];
         }
-    });
-    document.querySelector("#summary").innerHTML = movieTemplate(response.data);
+        return response.data.Search;
+    }
 }
+
+createAutoComplete(
+    {
+        ...autoCompleteConfig,
+        root: document.body.querySelector('#left-autocomplete'),
+        placeHolder: "First Movie",
+        
+        async onOptionSelect(movie){
+            if(document.contains(document.querySelector(".tutorial"))){
+                document.querySelector(".tutorial").remove();
+            }            const {imdbID: movieId} = movie;
+            const response = await axios.get("http://www.omdbapi.com/", {
+                params:{
+                    apikey: "3bf6204b",
+                    i: movieId
+                }
+            });
+            document.querySelector("#left-summary").innerHTML = movieTemplate(response.data);
+        },
+        
+    }
+);
+
+createAutoComplete(
+    {
+        ...autoCompleteConfig,
+        root: document.querySelector('#right-autocomplete'),
+        placeHolder: "Second Movie",
+        async onOptionSelect(movie){
+            if(document.contains(document.querySelector(".tutorial"))){
+                document.querySelector(".tutorial").remove();
+            }
+            const {imdbID: movieId} = movie;
+            const response = await axios.get("http://www.omdbapi.com/", {
+                params:{
+                    apikey: "3bf6204b",
+                    i: movieId
+                }
+            });
+            document.querySelector("#right-summary").innerHTML = movieTemplate(response.data);
+        }
+    }
+);
+
+
 
 const movieTemplate = (movieDetail)=>{
     return `
@@ -113,3 +108,4 @@ const movieTemplate = (movieDetail)=>{
     </article>
     `
 }
+
