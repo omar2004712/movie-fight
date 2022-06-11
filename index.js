@@ -25,6 +25,23 @@ const autoCompleteConfig = {
     }
 }
 
+function changeCss () {
+    const navElement = document.querySelector(".navbar");
+    const title = document.querySelector('.title');
+
+    if(this.scrollY === 0){
+        navElement.style.height = ''
+        title.style.marginTop = ""
+    }
+    else {
+        navElement.style.height = '70px';
+        title.style.marginTop = "-30px"
+    }
+}
+  
+window.addEventListener("scroll", changeCss , false);
+
+
 let rightData;
 let leftData;
 
@@ -45,6 +62,11 @@ const onMovieSelect = async (movie, summaryEl, side)=>{
     }
 
     if(rightData && leftData){
+        document.querySelector('.navbar').style.position = 'absloute';
+        scroll({
+            top: 70,
+            behavior: "smooth"
+        })
         compare();
     }
 }
@@ -114,7 +136,7 @@ const movieTemplate = (movieDetail)=>{
     const dollars = movieDetail.BoxOffice === undefined ? undefined : parseInt(movieDetail.BoxOffice.replace(/\$/g, '').replace(/,/g, ''));
     const metascore = movieDetail.Metascore === undefined ? undefined : parseInt(movieDetail.Metascore);
     const imdbRating = movieDetail.imdbRating === undefined ? undefined : parseFloat(movieDetail.imdbRating);
-    const imdbVotes = movieDetail.imdbVotes === undefined ? undefined : parseInt(movieDetail.imdbVotes.replace(/,/, ''));
+    const imdbVotes = movieDetail.imdbVotes === undefined ? undefined : parseInt(movieDetail.imdbVotes.replace(/,/g, ''));
     const awards = movieDetail.Awards === undefined ? undefined : movieDetail.Awards.split(' ').reduce((totalAwards, item)=>{
         let award = parseInt(item);
         if(award){

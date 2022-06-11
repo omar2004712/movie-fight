@@ -1,3 +1,10 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  transition: all 1s;
+}
+
+
 .tutorial {
   width: 600px;
   text-align: center;
@@ -11,7 +18,8 @@ figure.image {
 }
 
 figure .image img {
-  width: 128px;
+  height: 250px;
+  /*width: 128px;*/
 }
 
 .notification {
